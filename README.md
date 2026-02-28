@@ -88,4 +88,4 @@ To bring this AI Agent online, link the following credentials inside your n8n in
 
 **Omar Abdelaal** - [oabdelall2004@gmail.com](mailto:oabdelall2004@gmail.com)
 
-Project Link: [https://github.com/omarAbdelaal1/End-to-End-RAG-Pipeline-Chatbot](https://github.com/omarAbdelaal1/End-to-End-RAG-Pipeline-Chatbot)
+Project Link: [https://github.com/omarAbdelaal1/RAG-Pipeline-Email-Chatbot.git](https://github.com/omarAbdelaal1/RAG-Pipeline-Email-Chatbot.git)
