@@ -1,0 +1,319 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -688,
+        192
+      ],
+      "id": "32c224b2-d9f5-49f3-85df-b428aa697b8a",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "b4xYFN6ucsdJYyhx",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.snippet }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "Customer Support",
+              "description": "An email from an expected customer asking about our policies  or services ."
+            },
+            {
+              "category": "Other",
+              "description": "Any email that is not customer support related"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "typeVersion": 1.1,
+      "position": [
+        -496,
+        208
+      ],
+      "id": "458e78c2-a566-4258-904a-dce9ce1aa477",
+      "name": "Text Classifier"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4o-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -528,
+        384
+      ],
+      "id": "497e5101-c8f6-4284-83d4-214955bb874d",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "hX9vgXyZUIKY0dUJ",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        368
+      ],
+      "id": "343647a7-7c54-4fd9-b71c-d2143279d6d9",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.snippet }}",
+        "options": {
+          "systemMessage": "=# Overview\nYou are a customer support agent for Deep-x. Your job is to respond to incoming emails with relevant information using your knowledge tool.\n\n## Instructions\nYour output should be friendly and use emojis.\nSign off as Mr.sam from Deep-x \n\n## Output\nOutput only the body content of the email"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        0,
+        96
+      ],
+      "id": "b8c67440-36cd-4723-9d04-a209681bdd3e",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4o-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        0,
+        400
+      ],
+      "id": "80cf3548-f882-409d-8bcc-876034d67eaa",
+      "name": "OpenRouter Chat Model1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "hX9vgXyZUIKY0dUJ",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "Call this tool to access policy and FAQ information",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "faq",
+          "mode": "list",
+          "cachedResultName": "faq"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        96,
+        272
+      ],
+      "id": "34dec3ac-ac0c-492a-9c05-dd8a780856cc",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "jquBS5axGcYaTwG3",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        192,
+        416
+      ],
+      "id": "51451c37-03df-44a1-8453-0f88c1084df2",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "S8vabb7hSH8hK1A9",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "emailType": "text",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        352,
+        96
+      ],
+      "id": "a96f9656-254c-460f-8300-35cb49b641b9",
+      "name": "Reply to a message",
+      "webhookId": "95f45907-631f-4a58-be47-505e0dbee85d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "b4xYFN6ucsdJYyhx",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "labelIds": [
+          "CATEGORY_SOCIAL"
+        ]
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        560,
+        96
+      ],
+      "id": "d89afdb2-f4e9-418f-bd40-5d77960316e0",
+      "name": "Add label to message",
+      "webhookId": "5a57b541-8524-4d5b-8707-0f0fab0da14d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "b4xYFN6ucsdJYyhx",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Classifier": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Reply to a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply to a message": {
+      "main": [
+        [
+          {
+            "node": "Add label to message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c9ef4b649e630748599cb802d115c4ec1a60aa5424d5404ce8861bf54e00b8a1"
+  }
+}
